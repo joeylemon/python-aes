@@ -1,7 +1,7 @@
 # python-aes
 ![Test](https://github.com/joeylemon/python-aes/workflows/Test/badge.svg)
 
-An implementation of the AES (Rijndael) algorithm in Python, following the Federal Information Processing Standards Publication 197 ([FIPS-197](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf)) specification sheet.
+An implementation of the Advanced Encryption Standard (AES/Rijndael) algorithm in Python, following the Federal Information Processing Standards Publication 197 ([FIPS-197](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf)) specification sheet.
 
 ## Motivation
 
