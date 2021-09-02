@@ -70,17 +70,6 @@ inv_ax = [[0x0e, 0x0b, 0x0d, 0x09],
           [0x0b, 0x0d, 0x09, 0x0e]]
 
 
-def print_round(round, step, value, verbose):
-    """
-    Print the value for a round (only in verbose mode)
-    e.g. print_round(0, "input", "00112233445566778899aabbccddeeff")
-      => round[ 0].input     00112233445566778899aabbccddeeff
-    """
-    if verbose:
-        print('{:<19} {:}'.format(
-            'round[{:2}].{:}'.format(round, step), value))
-
-
 def encrypt(plaintext, key, verbose=False):
     """
     Perform the AES cipher routine on the given plaintext using the given key.
@@ -166,47 +155,6 @@ def decrypt(ciphertext, key, verbose=False):
     return matrix_to_text(state)
 
 
-def text_to_bytes(text):
-    """
-    Convert a string representing bytes into an array of integers.
-    e.g. text_to_bytes("00112233445566778899aabbccddeeff")
-      => [0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff]
-    """
-    return [int(text[i] + text[i+1], 16) for i in range(0, len(text), 2)]
-
-
-def text_to_matrix(text):
-    """
-    Convert a string representing 16 bytes into a 4x4 matrix.
-    e.g. text_to_matrix("00112233445566778899aabbccddeeff")
-      => [[0x00, 0x44, 0x88, 0xcc], 
-          [0x11, 0x55, 0x99, 0xdd], 
-          [0x22, 0x66, 0xaa, 0xee], 
-          [0x33, 0x77, 0xbb, 0xff]]
-    """
-    matrix = []
-    for i in range(0, 8, 2):
-        matrix.append([int(text[i] + text[i+1], 16), int(text[i+8] + text[i+9], 16),
-                      int(text[i+16] + text[i+17], 16), int(text[i+24] + text[i+25], 16)])
-    return matrix
-
-
-def matrix_to_text(matrix):
-    """
-    Convert a 4x4 matrix into a string representing 16 bytes.
-    e.g. matrix_to_text([[0x00, 0x44, 0x88, 0xcc], 
-                         [0x11, 0x55, 0x99, 0xdd], 
-                         [0x22, 0x66, 0xaa, 0xee], 
-                         [0x33, 0x77, 0xbb, 0xff]])
-      => "00112233445566778899aabbccddeeff"
-    """
-    text = ""
-    for c in range(4):
-        text += '{:02x}{:02x}{:02x}{:02x}'.format(
-            matrix[0][c], matrix[1][c], matrix[2][c], matrix[3][c])
-    return text
-
-
 def xtime(a):
     """ Multiply the given polynomial (finite field) by x. """
     b = a << 1
@@ -259,15 +207,6 @@ def inv_sub_bytes(state):
     inverse S-box is applied to each byte of the State.
     """
     sub_bytes(state, s_box=inv_s_box)
-
-
-def create_word(byte_arr):
-    """
-    Take an array of 4 bytes and generate a single value representing a word.
-    e.g. create_word([0x00, 0x11, 0x22, 0x33])
-      => 0x00112233
-    """
-    return (byte_arr[0] << 24) | (byte_arr[1] << 16) | (byte_arr[2] << 8) | byte_arr[3]
 
 
 def sub_word(word):
@@ -345,6 +284,7 @@ def key_expansion(key_bytes, Nb, Nr, Nk):
                             key_bytes[4*i+2], key_bytes[4*i+3]])
 
     # Follow the key expansion routine from Nk to (Nb * (Nr + 1))
+    # Almost a word-for-word translation of the pseudocode in FIPS-197 pp. 20
     for i in range(Nk, Nb * (Nr + 1)):
         temp = w[i-1]
         if i % Nk == 0:
@@ -370,8 +310,69 @@ def add_round_key(state, w, round, Nb):
             state[r][c] ^= bytes[r]
 
 
+def create_word(byte_arr):
+    """
+    Take an array of 4 bytes and generate a single value representing a word.
+    e.g. create_word([0x00, 0x11, 0x22, 0x33])
+      => 0x00112233
+    """
+    return (byte_arr[0] << 24) | (byte_arr[1] << 16) | (byte_arr[2] << 8) | byte_arr[3]
+
+
+def text_to_bytes(text):
+    """
+    Convert a string representing bytes into an array of integers.
+    e.g. text_to_bytes("00112233445566778899aabbccddeeff")
+      => [0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff]
+    """
+    return [int(text[i] + text[i+1], 16) for i in range(0, len(text), 2)]
+
+
+def text_to_matrix(text):
+    """
+    Convert a string representing 16 bytes into a 4x4 matrix.
+    e.g. text_to_matrix("00112233445566778899aabbccddeeff")
+      => [[0x00, 0x44, 0x88, 0xcc], 
+          [0x11, 0x55, 0x99, 0xdd], 
+          [0x22, 0x66, 0xaa, 0xee], 
+          [0x33, 0x77, 0xbb, 0xff]]
+    """
+    matrix = []
+    for i in range(0, 8, 2):
+        matrix.append([int(text[i] + text[i+1], 16), int(text[i+8] + text[i+9], 16),
+                      int(text[i+16] + text[i+17], 16), int(text[i+24] + text[i+25], 16)])
+    return matrix
+
+
+def matrix_to_text(matrix):
+    """
+    Convert a 4x4 matrix into a string representing 16 bytes.
+    e.g. matrix_to_text([[0x00, 0x44, 0x88, 0xcc], 
+                         [0x11, 0x55, 0x99, 0xdd], 
+                         [0x22, 0x66, 0xaa, 0xee], 
+                         [0x33, 0x77, 0xbb, 0xff]])
+      => "00112233445566778899aabbccddeeff"
+    """
+    return ''.join(['{:02x}{:02x}{:02x}{:02x}'.format(
+        matrix[0][c], matrix[1][c], matrix[2][c], matrix[3][c]) for c in range(4)])
+
+
+def print_round(round, step, value, verbose):
+    """
+    Print the value for a round (only in verbose mode)
+    e.g. print_round(0, "input", "00112233445566778899aabbccddeeff")
+      => round[ 0].input     00112233445566778899aabbccddeeff
+    """
+    if verbose:
+        print('{:<19} {:}'.format(
+            'round[{:2}].{:}'.format(round, step), value))
+
+
 def perform_aes_algorithm(plaintext, key):
-    """ Perform the AES algorithm upon the given inputs with verbose printing. """
+    """
+    Perform the AES algorithm upon the given inputs with verbose printing.
+    Follow the output format found in Appendix C of FIPS-197.
+    """
     if len(key) == 32:
         print('C.1   AES-128 (Nk=4, Nr=10)\n')
     elif len(key) == 48:
