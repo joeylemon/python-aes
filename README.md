@@ -5,7 +5,9 @@ An implementation of the AES (Rijndael) algorithm in Python, following the Feder
 
 ## Motivation
 
-As students in COSC483: Applied Cryptography at the [University of Tennessee Knoxville](https://utk.edu), we were tasked with implementing the AES algorithm from scratch in any programming language of our choice. This involved implementing finite field arithmetic, key expansion routines, the cipher (encrypt) function, and the inverse cipher (decrypt) function. One of the only resources behind the algorithm which we were allowed to use was the FIPS Publication 197.
+As students in COSC483: Applied Cryptography at the [University of Tennessee Knoxville](https://utk.edu), we were tasked with implementing the AES algorithm from scratch in any programming language of our choice. This involved implementing finite field arithmetic, key expansion routines, the cipher (encrypt) function, and the inverse cipher (decrypt) function. The only resources behind the algorithm which we were allowed to use was the [FIPS Publication 197](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf), an [animation](https://www.youtube.com/watch?v=gP4PqVGudtg), a [stick figure guide](http://www.moserware.com/assets/stick-figure-guide-to-advanced/A%20Stick%20Figure%20Guide%20to%20the%20Advanced%20Encryption%20Standard%20%28AES%29.pdf), and [Wikipedia's write-up for AES](http://en.wikipedia.org/wiki/Advanced_Encryption_Standard). I followed these instructions and only used the given resources, with almost 98% of my time spent looking over FIPS-197.
+
+FIPS-197 provides a plethora of information to assist in implementing the AES algorithm. Among the provided information is the test output in Appendix C, which provides step-by-step values for each round of the cipher and inverse cipher routines. This program matches the output from Appendix C exactly.
 
 ## How to Use
 
